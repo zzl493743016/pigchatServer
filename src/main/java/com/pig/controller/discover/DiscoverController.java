@@ -50,7 +50,7 @@ public class DiscoverController {
             return ResponseObj.createBy(ResponseCode.ERROR, "查无此人");
         }
         // 2.查看是否与自己是同一人
-        if (myId.equals(String.valueOf(friend.getId()))) {
+        if (myId.equals(friend.getId())) {
             return ResponseObj.createBy(ResponseCode.ERROR, "查到的是自己啊傻逼");
         }
         // 3.查看是否已经是朋友
@@ -72,21 +72,19 @@ public class DiscoverController {
     public ResponseObj addFriend(Integer myId,
                                  String friendName,
                                  String note) {
-
         // 1.查找是否存在该好友
         User friend = userService.findByUserName(friendName);
         if (ObjectUtils.isEmpty(friend)) {
             return ResponseObj.createBy(ResponseCode.ERROR, "查无此人");
         }
         // 2.查看是否与自己是同一人
-        if (myId.equals(String.valueOf(friend.getId()))) {
+        if (myId.equals(friend.getId())) {
             return ResponseObj.createBy(ResponseCode.ERROR, "查到的是自己啊傻逼");
         }
         // 3.查看是否已经是朋友
         if (!ObjectUtils.isEmpty(friendService.findByFriendId(friend.getId()))) {
             return ResponseObj.createBy(ResponseCode.ERROR, "该用户已经是你的好友了");
         }
-
         // 4.发送添加好友请求
         if (addFriendRecordService.addFriendRequest(myId, friend.getId(), note)) {
             return ResponseObj.createBy(ResponseCode.SUCCESS, "发送好友请求成功");

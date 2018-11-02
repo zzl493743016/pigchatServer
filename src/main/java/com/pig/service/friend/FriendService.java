@@ -1,6 +1,7 @@
 package com.pig.service.friend;
 
 import com.pig.dao.pojo.Friend;
+import io.swagger.models.auth.In;
 
 /**
  * @author Arthas
@@ -15,6 +16,14 @@ public interface FriendService {
     Friend findByFriendId(Integer friendId);
 
 
+    /**
+     * 查看是否已经是朋友关系
+     */
+    boolean checkIfFriends(Integer myId, Integer friendId);
 
+    /**
+     * 添加好友关系
+     */
+    boolean addFriend(Integer myId, Integer friendId);
 
 }

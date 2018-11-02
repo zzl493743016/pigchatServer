@@ -8,6 +8,7 @@ import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,6 +41,18 @@ public class AddFriendRecordServiceImpl implements AddFriendRecordService {
         AddFriendRecordExample.Criteria criteria = example.createCriteria();
         criteria.andRecieverIdEqualTo(myId);
         return addFriendRecordMapper.selectByExample(example);
+    }
+
+    @Override
+    public void removeRecord(Integer myId, Integer friendId) {
+        List<Integer> idList = new ArrayList<>();
+        idList.add(myId);
+        idList.add(friendId);
+        AddFriendRecordExample example = new AddFriendRecordExample();
+        AddFriendRecordExample.Criteria criteria = example.createCriteria();
+        criteria.andSenderIdIn(idList)
+                .andRecieverIdIn(idList);
+        addFriendRecordMapper.deleteByExample(example);
     }
 
 }

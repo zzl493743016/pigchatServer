@@ -21,4 +21,11 @@ public interface AddFriendRecordService {
      * @return
      */
     List<AddFriendRecord> findAddFriendRecords(Integer myId);
+
+    /**
+     * 删除好友请求记录
+     * @param myId
+     * @param friendId
+     */
+    void removeRecord(Integer myId, Integer friendId);
 }
