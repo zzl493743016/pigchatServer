@@ -22,7 +22,7 @@ import java.util.List;
  * @author Arthas
  * @create 2018/11/2
  */
-@RequestMapping(value = "/discover/")
+@RequestMapping(value = "/contact/")
 @Controller
 @Api("通讯录接口")
 public class ContactController {
