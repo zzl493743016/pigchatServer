@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
+
+    @Autowired
+    private ChatChannel chatChannel;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -27,8 +31,9 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
         // 对httpMessage进行聚合
         pipeline.addLast(new HttpObjectAggregator(1024 * 64));
 
+        // 配置访问路径
         pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
-
-        pipeline.addLast(new ChatChannel());
+        // 配置自定义channel
+        pipeline.addLast(chatChannel);
     }
 }
