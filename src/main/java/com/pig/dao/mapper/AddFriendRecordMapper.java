@@ -4,8 +4,10 @@ import com.pig.dao.pojo.AddFriendRecord;
 import com.pig.dao.pojo.AddFriendRecordExample;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+@Mapper
 public interface AddFriendRecordMapper {
     long countByExample(AddFriendRecordExample example);
 

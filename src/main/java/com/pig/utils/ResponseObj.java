@@ -51,6 +51,10 @@ public class ResponseObj<T> implements Serializable {
         return new ResponseObj<T>(code.getCode(), StringUtils.isBlank(msg) ? code.getMsg() : msg);
     }
 
+    public static <T>ResponseObj<T> createBy(ResponseCode code, T data) {
+        return new ResponseObj<T>(code.getCode(), code.getMsg(), data);
+    }
+
     public static <T>ResponseObj<T> createBy(ResponseCode code) {
         return new ResponseObj<T>(code.getCode(), code.getMsg());
     }

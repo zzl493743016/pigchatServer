@@ -3,8 +3,11 @@ package com.pig.dao.mapper;
 import com.pig.dao.pojo.ChatLog;
 import com.pig.dao.pojo.ChatLogExample;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+@Mapper
 public interface ChatLogMapper {
     long countByExample(ChatLogExample example);
 

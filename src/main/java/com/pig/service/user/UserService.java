@@ -1,5 +1,7 @@
 package com.pig.service.user;
 
+import com.pig.dao.pojo.User;
+
 /**
  * @author Arthas
  * @create 2018/11/2
@@ -7,19 +9,20 @@ package com.pig.service.user;
 public interface UserService {
 
     /**
-     * 查看是否已注册
+     * 查看是否有该用户
      */
-    boolean checkIfUserNameExist(String userName);
+    User findByUserName(String userName);
 
 
     /**
-     * 注册
+     * 添加用户
      */
-    boolean register(String userName, String password);
+    boolean addUser(String userName, String password);
 
 
     /**
-     * 登陆
+     * 根据用户名和密码寻找用户
      */
-    boolean login(String userName, String password);
+    User findByUserNameAndPsw(String userName, String password);
+
 }

@@ -7,6 +7,9 @@ import com.pig.service.user.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 /**
  * @author Arthas
@@ -20,22 +23,23 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
 
     @Override
-    public boolean checkIfUserNameExist(String userName) {
+    public User findByUserName(String userName) {
         if (StringUtils.isBlank(userName)) {
-            return false;
+            return null;
         }
         UserExample example = new UserExample();
         UserExample.Criteria criteria = example.createCriteria();
         criteria.andUserNameEqualTo(userName);
-        long count = userMapper.countByExample(example);
-        if (count > 0) {
-            return true;
+        List<User> users = userMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(users)) {
+            return null;
+        } else {
+            return users.get(0);
         }
-        return false;
     }
 
     @Override
-    public boolean register(String userName, String password) {
+    public boolean addUser(String userName, String password) {
         User user = new User();
         user.setUserName(userName);
         user.setPassword(password);
@@ -47,15 +51,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean login(String userName, String password) {
+    public User findByUserNameAndPsw(String userName, String password) {
         UserExample example = new UserExample();
         UserExample.Criteria criteria = example.createCriteria();
         criteria.andUserNameEqualTo(userName);
         criteria.andPasswordEqualTo(password);
-        long count = userMapper.countByExample(example);
-        if (count > 0) {
-            return true;
+        List<User> users = userMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(users)) {
+            return null;
+        } else {
+            return users.get(0);
         }
-        return false;
     }
 }
