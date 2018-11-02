@@ -4,6 +4,7 @@ import com.pig.dao.mapper.UserMapper;
 import com.pig.dao.pojo.User;
 import com.pig.dao.pojo.UserExample;
 import com.pig.service.user.UserService;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,5 +63,13 @@ public class UserServiceImpl implements UserService {
         } else {
             return users.get(0);
         }
+    }
+
+    @Override
+    public List<User> getUsersByIds(List<Integer> ids) {
+        UserExample example = new UserExample();
+        UserExample.Criteria criteria = example.createCriteria();
+        criteria.andIdIn(ids);
+        return userMapper.selectByExample(example);
     }
 }

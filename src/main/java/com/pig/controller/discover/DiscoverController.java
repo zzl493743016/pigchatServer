@@ -1,6 +1,5 @@
 package com.pig.controller.discover;
 
-import com.pig.dao.pojo.AddFriendRecord;
 import com.pig.dao.pojo.User;
 import com.pig.service.addFriendRecord.AddFriendRecordService;
 import com.pig.service.friend.FriendService;
@@ -13,6 +12,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +69,7 @@ public class DiscoverController {
     })
     @PostMapping("addFriend")
     @ResponseBody
+    @Transactional(rollbackFor = Exception.class)
     public ResponseObj addFriend(Integer myId,
                                  String friendName,
                                  String note) {

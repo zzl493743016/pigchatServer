@@ -4,11 +4,10 @@ import com.pig.dao.mapper.AddFriendRecordMapper;
 import com.pig.dao.pojo.AddFriendRecord;
 import com.pig.dao.pojo.AddFriendRecordExample;
 import com.pig.service.addFriendRecord.AddFriendRecordService;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,13 +44,10 @@ public class AddFriendRecordServiceImpl implements AddFriendRecordService {
 
     @Override
     public void removeRecord(Integer myId, Integer friendId) {
-        List<Integer> idList = new ArrayList<>();
-        idList.add(myId);
-        idList.add(friendId);
         AddFriendRecordExample example = new AddFriendRecordExample();
         AddFriendRecordExample.Criteria criteria = example.createCriteria();
-        criteria.andSenderIdIn(idList)
-                .andRecieverIdIn(idList);
+        criteria.andSenderIdIn(Arrays.asList(myId, friendId))
+                .andRecieverIdIn(Arrays.asList(myId, friendId));
         addFriendRecordMapper.deleteByExample(example);
     }
 
