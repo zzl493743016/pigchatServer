@@ -19,18 +19,18 @@ public enum  ResponseCode {
     SYSTEM_ERROR(500, "SYSTEM_ERROR");
 
     private final int code;
-    private final String desc;
+    private final String msg;
 
-    ResponseCode(int code, String desc) {
+    ResponseCode(int code, String msg) {
         this.code = code;
-        this.desc = desc;
+        this.msg = msg;
     }
 
     public int getCode() {
         return code;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getMsg() {
+        return msg;
     }
 }

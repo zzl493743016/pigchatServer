@@ -9,6 +9,7 @@
     <result column="image" jdbcType="VARCHAR" property="image" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="last_update_Time" jdbcType="TIMESTAMP" property="lastUpdateTime" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
   </resultMap>
   <sql id="Example_Where_Clause">
     <where>
@@ -69,7 +70,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    id, user_name, age, sex, image, create_time, last_update_Time
+    id, user_name, age, sex, image, create_time, last_update_Time, password
   </sql>
   <select id="selectByExample" parameterType="com.pig.dao.pojo.UserExample" resultMap="BaseResultMap">
     select
@@ -112,10 +113,10 @@
   <insert id="insert" parameterType="com.pig.dao.pojo.User">
     insert into user (id, user_name, age, 
       sex, image, create_time, 
-      last_update_Time)
+      last_update_Time, password)
     values (#{id,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{age,jdbcType=TINYINT}, 
       #{sex,jdbcType=CHAR}, #{image,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{lastUpdateTime,jdbcType=TIMESTAMP})
+      #{lastUpdateTime,jdbcType=TIMESTAMP}, #{password,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.pig.dao.pojo.User">
     insert into user
@@ -141,6 +142,9 @@
       <if test="lastUpdateTime != null">
         last_update_Time,
       </if>
+      <if test="password != null">
+        password,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -163,6 +167,9 @@
       </if>
       <if test="lastUpdateTime != null">
         #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -196,6 +203,9 @@
       <if test="record.lastUpdateTime != null">
         last_update_Time = #{record.lastUpdateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="record.password != null">
+        password = #{record.password,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -209,7 +219,8 @@
       sex = #{record.sex,jdbcType=CHAR},
       image = #{record.image,jdbcType=VARCHAR},
       create_time = #{record.createTime,jdbcType=TIMESTAMP},
-      last_update_Time = #{record.lastUpdateTime,jdbcType=TIMESTAMP}
+      last_update_Time = #{record.lastUpdateTime,jdbcType=TIMESTAMP},
+      password = #{record.password,jdbcType=VARCHAR}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -235,6 +246,9 @@
       <if test="lastUpdateTime != null">
         last_update_Time = #{lastUpdateTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="password != null">
+        password = #{password,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -245,7 +259,8 @@
       sex = #{sex,jdbcType=CHAR},
       image = #{image,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
-      last_update_Time = #{lastUpdateTime,jdbcType=TIMESTAMP}
+      last_update_Time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      password = #{password,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
