@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,6 +19,8 @@ public class RedisService {
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+
+    private static Random random =new Random();
 
     /**
      * 默认过期时长，单位：秒
@@ -46,7 +49,9 @@ public class RedisService {
      * setex操作(有过期时间)
      */
     public void setex(String key, String value, long expireTime) {
-        redisTemplate.opsForValue().set(key, value, expireTime, TimeUnit.SECONDS);
+        // 过期时间增加随机时间，以免发生同时key过期造成redis卡顿
+        expireTime = expireTime * 1000 + random.nextInt(1000) + 1;
+        redisTemplate.opsForValue().set(key, value, expireTime, TimeUnit.MILLISECONDS);
     }
 
     /**

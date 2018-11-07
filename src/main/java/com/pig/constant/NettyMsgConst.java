@@ -12,7 +12,7 @@ public class NettyMsgConst {
         //
         SINGLE_CHAT(2, "单聊"),
         //
-        HEART_BEAT(3, "心跳");
+        SIGNED(3, "签收");
 
         private Integer type;
         private String desc;

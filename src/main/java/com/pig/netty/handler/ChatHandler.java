@@ -38,14 +38,12 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         super.handlerAdded(ctx);
-        logger.info("添加channel");
         userChannelCache.addChannel(ctx.channel());
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
-        logger.info("移除channel");
         userChannelCache.removeChannel(ctx.channel());
     }
 
@@ -66,15 +64,13 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             RegisterMsg registerMsg = JsonUtil.strToObj(frame.text(), RegisterMsg.class);
             // 保存用户与channel的关系
             userChannelCache.saveRelation(registerMsg.getUserId(), curChannel.id().asLongText());
-            logger.info(registerMsg.toString());
         } else if (NettyMsgConst.MSG_TYPE.SINGLE_CHAT.getType().equals(msg.getType())) {
             // todo 单聊
             SingleChatMsg singleChatMsg = JsonUtil.strToObj(frame.text(), SingleChatMsg.class);
             Channel receiverChannel = userChannelCache.getChannelByUserId(singleChatMsg.getReceiverUserId());
             receiverChannel.writeAndFlush(new TextWebSocketFrame(singleChatMsg.getContent()));
-            logger.info(singleChatMsg.toString());
-        } else if (NettyMsgConst.MSG_TYPE.HEART_BEAT.getType().equals(msg.getType())) {
-            // todo 心跳
+        } else if (NettyMsgConst.MSG_TYPE.SIGNED.getType().equals(msg.getType())) {
+            // todo 签收
         }
 
     }
