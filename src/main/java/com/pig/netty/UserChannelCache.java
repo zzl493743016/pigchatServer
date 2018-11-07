@@ -6,9 +6,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.net.InetAddress;
 import java.util.Map;
@@ -23,12 +26,11 @@ public class UserChannelCache {
 
     @Autowired
     private RedisService redisService;
-
     @Value("${netty.port}")
     private Integer port;
 
+    private static final Logger logger = LoggerFactory.getLogger(UserChannelCache.class);
     private static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-
     private static final String CHANNEL_MAP = "CHANNEL_MAP";
 
     /**
@@ -41,10 +43,15 @@ public class UserChannelCache {
      * 移除channel缓存，并删除channel与用户的关系
      */
     public void removeChannel(Channel channel) {
+        // 移除本地channel缓存
+        if (channel.isOpen()) {
+            channel.close();
+        }
         channels.remove(channel);
+        // 移除channel与用户关系
         for (Map.Entry entry : redisService.hgetall(CHANNEL_MAP).entrySet()) {
             UserChannelCacheModel model = JsonUtil.strToObj((String) entry.getValue(), UserChannelCacheModel.class);
-            if (channel.id().asLongText().equals(model.getChannelId())) {
+            if (!ObjectUtils.isEmpty(model) && channel.id().asLongText().equals(model.getChannelId())) {
                 removeRelation((Integer) entry.getKey());
             }
         }
@@ -52,7 +59,8 @@ public class UserChannelCache {
     /**
      * 缓存用户与channel的关系到redis中
      */
-    public void saveRelation(Integer userId, String channelId) throws Exception{
+    public void saveRelation(Integer userId, String channelId) throws Exception {
+        logger.warn("添加通道，用户id:" + userId);
         UserChannelCacheModel model = new UserChannelCacheModel();
         model.setChannelId(channelId);
         model.setIp(InetAddress.getLocalHost().getHostAddress());
@@ -63,6 +71,7 @@ public class UserChannelCache {
      * 移除redis中用户与channel的关系
      */
     private void removeRelation(Integer userId) {
+        logger.warn("移除通道，用户id:" + userId);
         redisService.hdel(CHANNEL_MAP, userId.toString());
     }
     /**
@@ -70,9 +79,11 @@ public class UserChannelCache {
      */
     public Channel getChannelByUserId(Integer userId) {
         UserChannelCacheModel model = JsonUtil.strToObj((String) redisService.hget(CHANNEL_MAP, userId.toString()), UserChannelCacheModel.class);
-        for (Channel channel : channels) {
-            if (channel.id().asLongText().equals(model.getChannelId())) {
-                return channel;
+        if (!ObjectUtils.isEmpty(model)) {
+            for (Channel channel : channels) {
+                if (channel.id().asLongText().equals(model.getChannelId())) {
+                    return channel;
+                }
             }
         }
         return null;

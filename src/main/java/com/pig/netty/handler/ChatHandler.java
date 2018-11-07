@@ -31,6 +31,7 @@ import springfox.documentation.spring.web.json.Json;
 public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatHandler.class);
+
     @Autowired
     private UserChannelCache userChannelCache;
 
@@ -51,7 +52,8 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
-        logger.info("channel发生错误", cause);
+        logger.info("channel发生异常", cause);
+        userChannelCache.removeChannel(ctx.channel());
     }
 
     @Override
