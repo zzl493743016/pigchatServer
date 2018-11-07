@@ -5,6 +5,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Arthas
@@ -46,4 +48,39 @@ public class RedisService {
         return redisTemplate.opsForValue().get(key);
     }
 
+    /**
+     * hset操作
+     */
+    public void hset(String key, String hashKey, Object hashValue) {
+        redisTemplate.opsForHash().put(key, hashKey, hashValue);
+    }
+
+    /**
+     * hget操作
+     */
+    public Object hget(String key, String hashKey) {
+        Object value = redisTemplate.opsForHash().get(key, hashKey);
+        return value;
+    }
+
+    /**
+     * hdel操作
+     */
+    public void hdel(String key, String hashKey) {
+        redisTemplate.opsForHash().delete(key, hashKey);
+    }
+
+    /**
+     * hgetall操作
+     */
+    public Map<Object, Object> hgetall(String key) {
+        return redisTemplate.opsForHash().entries(key);
+    }
+
+    /**
+     * hvals操作
+     */
+    public List<Object> hvals(String key) {
+        return redisTemplate.opsForHash().values(key);
+    }
 }

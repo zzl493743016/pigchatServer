@@ -1,5 +1,6 @@
 package com.pig.netty;
 
+import com.pig.netty.handler.ChatHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
     @Autowired
-    private ChatChannel chatChannel;
+    private ChatHandler chatHandler;
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -34,6 +35,6 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
         // 配置访问路径
         pipeline.addLast(new WebSocketServerProtocolHandler("/ws"));
         // 配置自定义channel
-        pipeline.addLast(chatChannel);
+        pipeline.addLast(chatHandler);
     }
 }
