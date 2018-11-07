@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Arthas
@@ -28,10 +29,24 @@ public class RedisService {
     public static final long NOT_EXPIRE = -1;
 
     /**
+     * del操作
+     */
+    public void del(String key) {
+        redisTemplate.delete(key);
+    }
+
+    /**
      * set操作
      */
     public void set(String key, String value) {
         redisTemplate.opsForValue().set(key, value);
+    }
+
+    /**
+     * setex操作(有过期时间)
+     */
+    public void setex(String key, String value, long expireTime) {
+        redisTemplate.opsForValue().set(key, value, expireTime, TimeUnit.SECONDS);
     }
 
     /**

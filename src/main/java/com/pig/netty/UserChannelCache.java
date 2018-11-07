@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.net.InetAddress;
-import java.util.Map;
 
 /**
  * 用户与channel的关系 存储器
@@ -31,8 +30,11 @@ public class UserChannelCache {
 
     private static final Logger logger = LoggerFactory.getLogger(UserChannelCache.class);
     private static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-    private static final String CHANNEL_MAP = "CHANNEL_MAP";
-
+    private static final String KEY_NAME = "CHANNEL_USERID_";
+    /**
+     * 缓存过期时长，单位：秒
+     */
+    public static final long EXPIRE_TIME = 60 * 60 * 24 * 7;
     /**
      * 缓存channel到本地
      */
@@ -40,7 +42,7 @@ public class UserChannelCache {
         channels.add(channel);
     }
     /**
-     * 移除channel缓存，并删除channel与用户的关系
+     * 移除channel缓存
      */
     public void removeChannel(Channel channel) {
         // 移除本地channel缓存
@@ -48,13 +50,6 @@ public class UserChannelCache {
             channel.close();
         }
         channels.remove(channel);
-        // 移除channel与用户关系
-        for (Map.Entry entry : redisService.hgetall(CHANNEL_MAP).entrySet()) {
-            UserChannelCacheModel model = JsonUtil.strToObj((String) entry.getValue(), UserChannelCacheModel.class);
-            if (!ObjectUtils.isEmpty(model) && channel.id().asLongText().equals(model.getChannelId())) {
-                removeRelation((Integer) entry.getKey());
-            }
-        }
     }
     /**
      * 缓存用户与channel的关系到redis中
@@ -65,26 +60,32 @@ public class UserChannelCache {
         model.setChannelId(channelId);
         model.setIp(InetAddress.getLocalHost().getHostAddress());
         model.setPort(port);
-        redisService.hset(CHANNEL_MAP, userId.toString(), JsonUtil.objToStr(model));
+        redisService.setex(KEY_NAME + userId, JsonUtil.objToStr(model), EXPIRE_TIME);
     }
     /**
      * 移除redis中用户与channel的关系
      */
     private void removeRelation(Integer userId) {
         logger.warn("移除通道，用户id:" + userId);
-        redisService.hdel(CHANNEL_MAP, userId.toString());
+        redisService.del(KEY_NAME + userId);
     }
     /**
      * 通过用户id获取对应的channel
      */
     public Channel getChannelByUserId(Integer userId) {
-        UserChannelCacheModel model = JsonUtil.strToObj((String) redisService.hget(CHANNEL_MAP, userId.toString()), UserChannelCacheModel.class);
+        String str = redisService.get(KEY_NAME + userId);
+        UserChannelCacheModel model = JsonUtil.strToObj(str, UserChannelCacheModel.class);
         if (!ObjectUtils.isEmpty(model)) {
             for (Channel channel : channels) {
                 if (channel.id().asLongText().equals(model.getChannelId())) {
+                    // 找到用户对应的channel，并返回
                     return channel;
                 }
             }
+        }
+        // 如果没有找到用户对应的channel，则删除redis中多余的关系缓存
+        if (!ObjectUtils.isEmpty(str)) {
+            removeRelation(userId);
         }
         return null;
     }
