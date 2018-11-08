@@ -18,7 +18,7 @@ import org.springframework.util.ObjectUtils;
  * @create 2018/10/31
  */
 @Component
-public class NettyServer {
+public class NettyServer implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
 
@@ -26,6 +26,10 @@ public class NettyServer {
     private NettyChannelInitializer initializer;
     @Value("${netty.port}")
     private Integer port;
+    @Value("${netty.master.group.threads}")
+    private Integer masterGroupThreads;
+    @Value("${netty.sub.group.threads}")
+    private Integer subGroupThreads;
     private EventLoopGroup masterGroup;
     private EventLoopGroup subGroup;
     private ServerBootstrap bootstrap;
@@ -36,19 +40,19 @@ public class NettyServer {
     public void start() {
         try {
             // 创建 主线程池
-            masterGroup = new NioEventLoopGroup();
+            masterGroup = new NioEventLoopGroup(masterGroupThreads);
             // 创建 子线程池
-            subGroup = new NioEventLoopGroup();
+            subGroup = new NioEventLoopGroup(subGroupThreads);
             // 启动服务
             bootstrap = new ServerBootstrap();
             bootstrap.group(masterGroup, subGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(initializer);
             // 绑定端口，启动netty服务
-            ChannelFuture channelFuture = bootstrap.bind(8088).sync();
-            // 当容器关闭时，netty能优雅关闭
-            channelFuture.channel().closeFuture().sync();
+            ChannelFuture channelFuture = bootstrap.bind(port).syncUninterruptibly();
             logger.info("netty服务启动成功");
+            // 当容器关闭时，netty能优雅关闭
+            channelFuture.channel().closeFuture().syncUninterruptibly();
         } catch (Exception e) {
             logger.error("netty服务启动失败",e);
         } finally {
@@ -60,5 +64,9 @@ public class NettyServer {
                 masterGroup.shutdownGracefully();
             }
         }
+    }
+    @Override
+    public void run() {
+        start();
     }
 }

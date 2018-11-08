@@ -39,7 +39,7 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(new HttpObjectAggregator(1024 * 64));
 
         // 心跳检测
-        pipeline.addLast(new IdleStateHandler(100, 200, 500, TimeUnit.SECONDS));
+        pipeline.addLast(new IdleStateHandler(10, 20, 30, TimeUnit.SECONDS));
         // 自定义handler对于不同的空闲类型进行相应处理
         pipeline.addLast(heartBeatHandler);
 

@@ -35,7 +35,7 @@ public class HeartBeatHandler extends ChannelInboundHandlerAdapter {
                 logger.warn("channel写空闲");
             } else if (event.state() == IdleState.ALL_IDLE) {
                 logger.warn("channel完全空闲");
-                userChannelCache.removeChannel(ctx.channel());
+                userChannelCache.removeByChannel(ctx.channel());
             }
         }
 

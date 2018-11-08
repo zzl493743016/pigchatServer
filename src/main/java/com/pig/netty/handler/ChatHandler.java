@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import springfox.documentation.spring.web.json.Json;
 
 /**
@@ -38,22 +39,23 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         super.handlerAdded(ctx);
-        userChannelCache.addChannel(ctx.channel());
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
-        userChannelCache.removeChannel(ctx.channel());
+        userChannelCache.removeByChannel(ctx.channel());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         logger.info("channel发生异常", cause);
-        userChannelCache.removeChannel(ctx.channel());
+        userChannelCache.removeByChannel(ctx.channel());
     }
-
+    /**
+     * 消息处理
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame frame) throws Exception {
         logger.info("接受到的数据:" + frame.text());
@@ -62,15 +64,24 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         if (NettyMsgConst.MSG_TYPE.REGISTER.getType().equals(msg.getType())) {
             // 注册
             RegisterMsg registerMsg = JsonUtil.strToObj(frame.text(), RegisterMsg.class);
-            // 保存用户与channel的关系
-            userChannelCache.saveRelation(registerMsg.getUserId(), curChannel.id().asLongText());
+            if (!ObjectUtils.isEmpty(registerMsg)) {
+                // 保存用户与channel的关系
+                userChannelCache.add(registerMsg.getUserId(), curChannel);
+            }
         } else if (NettyMsgConst.MSG_TYPE.SINGLE_CHAT.getType().equals(msg.getType())) {
             // todo 单聊
             SingleChatMsg singleChatMsg = JsonUtil.strToObj(frame.text(), SingleChatMsg.class);
-            Channel receiverChannel = userChannelCache.getChannelByUserId(singleChatMsg.getReceiverUserId());
-            receiverChannel.writeAndFlush(new TextWebSocketFrame(singleChatMsg.getContent()));
+            if (!ObjectUtils.isEmpty(singleChatMsg)) {
+                Channel receiverChannel = userChannelCache.getChannelByUserId(singleChatMsg.getReceiverUserId());
+                if (!ObjectUtils.isEmpty(receiverChannel)) {
+                    // 找到在线的用户，发送消息
+                    receiverChannel.writeAndFlush(new TextWebSocketFrame(singleChatMsg.getContent()));
+                } else {
+                    // 发送离线消息（推送）
+                }
+            }
         } else if (NettyMsgConst.MSG_TYPE.SIGNED.getType().equals(msg.getType())) {
-            // todo 签收
+            // todo 签收消息
         }
 
     }
