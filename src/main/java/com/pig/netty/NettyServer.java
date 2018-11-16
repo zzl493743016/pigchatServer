@@ -30,29 +30,31 @@ public class NettyServer implements Runnable {
     private Integer masterGroupThreads;
     @Value("${netty.sub.group.threads}")
     private Integer subGroupThreads;
-    private EventLoopGroup masterGroup;
-    private EventLoopGroup subGroup;
-    private ServerBootstrap bootstrap;
 
     /**
      * 启动服务器
      */
     public void start() {
+        // 创建 主线程池
+        EventLoopGroup masterGroup = new NioEventLoopGroup(masterGroupThreads);
+        // 创建 子线程池
+        EventLoopGroup subGroup = new NioEventLoopGroup(subGroupThreads);
         try {
-            // 创建 主线程池
-            masterGroup = new NioEventLoopGroup(masterGroupThreads);
-            // 创建 子线程池
-            subGroup = new NioEventLoopGroup(subGroupThreads);
             // 启动服务
-            bootstrap = new ServerBootstrap();
+            ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(masterGroup, subGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(initializer);
             // 绑定端口，启动netty服务
-            ChannelFuture channelFuture = bootstrap.bind(port).syncUninterruptibly();
-            logger.info("netty服务启动成功");
-            // 当容器关闭时，netty能优雅关闭
-            channelFuture.channel().closeFuture().syncUninterruptibly();
+            ChannelFuture future = bootstrap.bind(port).sync();
+            // 判断启动是否成功
+            if (future.isSuccess()) {
+                logger.info("netty服务启动成功!!!!");
+                future.channel().closeFuture().sync();
+            } else {
+                logger.warn("netty服务启动失败，尝试重启");
+                start();
+            }
         } catch (Exception e) {
             logger.error("netty服务启动失败",e);
         } finally {

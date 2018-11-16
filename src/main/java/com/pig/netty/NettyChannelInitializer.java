@@ -6,6 +6,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -32,14 +34,17 @@ public class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
 
         ChannelPipeline pipeline = socketChannel.pipeline();
         // websocket基于http协议，所以要有http编解码器
-        pipeline.addLast(new HttpServerCodec());
+        // pipeline.addLast(new HttpServerCodec());
+        pipeline.addLast(new HttpRequestDecoder());
+        pipeline.addLast(new HttpObjectAggregator(1));
+        pipeline.addLast(new HttpResponseEncoder());
         // 对于大数据流的支持
         pipeline.addLast(new ChunkedWriteHandler());
         // 对httpMessage进行聚合
-        pipeline.addLast(new HttpObjectAggregator(1024 * 64));
+        // pipeline.addLast(new HttpObjectAggregator(1024 * 64));
 
         // 心跳检测
-        pipeline.addLast(new IdleStateHandler(10, 20, 30, TimeUnit.SECONDS));
+        pipeline.addLast(new IdleStateHandler(10, 20, 30, TimeUnit.MINUTES));
         // 自定义handler对于不同的空闲类型进行相应处理
         pipeline.addLast(heartBeatHandler);
 

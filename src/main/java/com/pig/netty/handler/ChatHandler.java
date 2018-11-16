@@ -53,11 +53,27 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         logger.info("channel发生异常", cause);
         userChannelCache.removeByChannel(ctx.channel());
     }
+
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        ctx.channel().read();
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        super.channelReadComplete(ctx);
+    }
+
     /**
      * 消息处理
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame frame) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, TextWebSocketFrame msg) throws Exception {
+
+        System.out.println(msg.text());
+        /*
         logger.info("接受到的数据:" + frame.text());
         NettyMsg msg = JsonUtil.strToObj(frame.text(), NettyMsg.class);
         Channel curChannel = channelHandlerContext.channel();
@@ -83,6 +99,7 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         } else if (NettyMsgConst.MSG_TYPE.SIGNED.getType().equals(msg.getType())) {
             // todo 签收消息
         }
+        */
 
     }
 }
